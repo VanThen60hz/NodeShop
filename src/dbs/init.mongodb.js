@@ -1,8 +1,12 @@
 "use strict";
 
 const mongoose = require("mongoose");
+const {
+    db: { host, name, port },
+} = require("../configs/config.mongodb");
 
-const connectString = "mongodb://localhost:27017/nodeshop";
+const connectString = `mongodb://${host}:${port}/${name}`;
+console.log(`connectString:` + connectString);
 
 const { countConnect } = require("../helpers/check.connect");
 
@@ -26,7 +30,7 @@ class Database {
                 countConnect();
             })
             .catch((err) => {
-                console.error("Database connection error");
+                console.error("Database connection error: " + err);
             });
     }
 
