@@ -3,6 +3,9 @@
 const shopModel = require("../models/shop.model");
 const bcrypt = require("bcrypt");
 const crypto = require("crypto");
+const keyTokenService = require("./keyToken.service");
+const { createTokenPair } = require("../auth/authUtils");
+const { getInfoData } = require("../utils");
 
 const roles = {
     SHOP: "SHOP",
@@ -25,10 +28,10 @@ class AccessService {
 
             const passwordHash = await bcrypt.hash(password, 10);
 
-            const newShop = shopModel.create({
+            const newShop = await shopModel.create({
                 name,
                 email,
-                passwordHash,
+                password: passwordHash,
                 role: [roles.SHOP],
             });
 
@@ -37,17 +40,49 @@ class AccessService {
                 const { privateKey, publicKey } = crypto.generateKeyPairSync("rsa", {
                     modulusLength: 4096,
                     publicKeyEncoding: {
-                        type: "spki",
-                        format: "pem",
+                        type: "pkcs1", // public key crypto system 1
+                        format: "pem", //privacy-enhanced mail
                     },
                     privateKeyEncoding: {
-                        type: "pkcs8",
+                        type: "pkcs1",
                         format: "pem",
                     },
                 });
 
                 console.log({ privateKey, publicKey });
+
+                const publicKeyString = await keyTokenService.createKeyToken({
+                    userId: newShop._id,
+                    publicKey,
+                });
+
+                if (!publicKeyString) {
+                    return {
+                        code: "xxx",
+                        message: "Error when create publicKey",
+                    };
+                }
+
+                const publicKeyObject = crypto.createPublicKey(publicKeyString);
+                console.log("Public Key Object: ", publicKeyObject);
+
+                // create token pair
+                const tokens = await createTokenPair({ userId: newShop._id, email }, publicKeyString, privateKey);
+                console.log("Created Token Success: ", tokens);
+
+                return {
+                    code: 201,
+                    metadata: {
+                        shop: getInfoData({ fields: ["_id", "name", "email"], object: newShop }),
+                        tokens,
+                    },
+                };
             }
+
+            return {
+                code: "200",
+                metadata: null,
+            };
         } catch (error) {
             return {
                 code: "xxx",
@@ -58,4 +93,4 @@ class AccessService {
     };
 }
 
-module.exports = new AccessService();
+module.exports = AccessService;
