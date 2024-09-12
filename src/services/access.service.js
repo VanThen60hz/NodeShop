@@ -49,25 +49,26 @@ class AccessService {
                     },
                 });
 
+                // const privateKey = crypto.randomBytes(64).toString("hex");
+                // const publicKey = crypto.randomBytes(64).toString("hex");
+
                 console.log({ privateKey, publicKey });
 
-                const publicKeyString = await keyTokenService.createKeyToken({
+                const keyStore = await keyTokenService.createKeyToken({
                     userId: newShop._id,
                     publicKey,
+                    privateKey,
                 });
 
-                if (!publicKeyString) {
+                if (!keyStore) {
                     return {
                         code: "xxx",
-                        message: "Error when create publicKey",
+                        message: "Error when create keyStore",
                     };
                 }
 
-                const publicKeyObject = crypto.createPublicKey(publicKeyString);
-                console.log("Public Key Object: ", publicKeyObject);
-
                 // create token pair
-                const tokens = await createTokenPair({ userId: newShop._id, email }, publicKeyString, privateKey);
+                const tokens = await createTokenPair({ userId: newShop._id, email }, publicKey, privateKey);
                 console.log("Created Token Success: ", tokens);
 
                 return {
