@@ -1,17 +1,9 @@
 "use strict";
 
-const StatusCode = {
-    OK: 200,
-    CREATED: 201,
-};
-
-const ReasonStatusCode = {
-    OK: "Success",
-    CREATED: "Created",
-};
+const { StatusCodes, ReasonPhrases } = require("../constants/httpStatusCode");
 
 class SuccessResponse {
-    constructor({ message, statusCode = StatusCode.OK, reasonStatusCode = ReasonStatusCode.OK, metadata = {} }) {
+    constructor({ message, statusCode = StatusCodes.OK, reasonStatusCode = ReasonPhrases.OK, metadata = {} }) {
         this.message = message || reasonStatusCode;
         this.status = statusCode;
         this.metadata = metadata;
@@ -30,12 +22,26 @@ class OK extends SuccessResponse {
 
 class CREATED extends SuccessResponse {
     constructor({ options = {}, message, metadata }) {
-        super({ message, statusCode: StatusCode.CREATED, reasonStatusCode: ReasonStatusCode.CREATED, metadata });
+        super({ message, statusCode: StatusCodes.CREATED, reasonStatusCode: ReasonPhrases.CREATED, metadata });
         this.options = options;
+    }
+}
+
+class NoContent extends SuccessResponse {
+    constructor({ message, metadata }) {
+        super({ message, statusCode: StatusCodes.NO_CONTENT, reasonStatusCode: ReasonPhrases.NO_CONTENT, metadata });
+    }
+}
+
+class Accepted extends SuccessResponse {
+    constructor({ message, metadata }) {
+        super({ message, statusCode: StatusCodes.ACCEPTED, reasonStatusCode: ReasonPhrases.ACCEPTED, metadata });
     }
 }
 
 module.exports = {
     OK,
     CREATED,
+    NoContent,
+    Accepted,
 };

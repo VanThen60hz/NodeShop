@@ -7,12 +7,7 @@ const keyTokenService = require("./keyToken.service");
 const { createTokenPair } = require("../auth/authUtils");
 const { getInfoData } = require("../utils");
 const { BadRequestError, ConflictRequestError } = require("../core/error.response");
-
-const roles = {
-    SHOP: "SHOP",
-    WRITER: "WRITER",
-    EDITOR: "EDITOR",
-};
+const roles = require("../constants/roles"); // Import roles từ constants
 
 class AccessService {
     static signUp = async ({ name, email, password }) => {
@@ -30,7 +25,7 @@ class AccessService {
             name,
             email,
             password: passwordHash,
-            role: [roles.SHOP],
+            role: [roles.SHOP], // Sử dụng roles từ constants
         });
 
         if (newShop) {
@@ -70,11 +65,8 @@ class AccessService {
             console.log("Created Token Success: ", tokens);
 
             return {
-                code: 201,
-                metadata: {
-                    shop: getInfoData({ fields: ["_id", "name", "email"], object: newShop }),
-                    tokens,
-                },
+                shop: getInfoData({ fields: ["_id", "name", "email"], object: newShop }),
+                tokens,
             };
         }
 
