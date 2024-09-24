@@ -32,7 +32,6 @@ class CREATED extends SuccessResponse {
     constructor({ options = {}, message, metadata }) {
         super({ message, statusCode: StatusCode.CREATED, reasonStatusCode: ReasonStatusCode.CREATED, metadata });
         this.options = options;
-        s;
     }
 }
 
