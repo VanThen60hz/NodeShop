@@ -11,6 +11,12 @@ const roles = require("../constants/roles"); // Import roles từ constants
 const { findByEmail } = require("../services/shop.service");
 
 class AccessService {
+    static logout = async (keyStore) => {
+        const delKey = await keyTokenService.removeKeyToken(keyStore._id);
+        console.log("Deleted Key: ", delKey);
+        return delKey;
+    };
+
     static login = async ({ email, password, refreshToken = null }) => {
         const foundShop = await findByEmail(email);
         if (!foundShop) {
