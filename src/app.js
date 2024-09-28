@@ -3,6 +3,7 @@ const express = require("express");
 const { default: helmet } = require("helmet");
 const morgan = require("morgan");
 const app = express();
+const cors = require("cors");
 
 // init middlewares
 app.use(morgan("dev"));
@@ -10,6 +11,7 @@ app.use(helmet());
 app.use(compression());
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
+app.use(cors());
 
 // init db
 require("./dbs/init.mongodb");
@@ -29,6 +31,7 @@ app.use((error, req, res, next) => {
     return res.status(statusCode).json({
         status: "error",
         code: statusCode,
+        stack: error.stack,
         message: error.message || "Internal Server Error",
     });
 });

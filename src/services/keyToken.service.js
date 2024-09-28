@@ -28,11 +28,32 @@ class KeyTokenService {
     };
 
     static findByUserId = async (userId) => {
-        return await keyTokenModel.findOne({ user: userId }).lean();
+        return await keyTokenModel.findOne({ user: userId });
     };
 
     static removeKeyToken = async (id) => {
         return await keyTokenModel.deleteOne(id);
+    };
+
+    static findByRefreshToken = async (refreshToken) => {
+        return await keyTokenModel.findOne({ refreshToken });
+    };
+
+    static findByRefreshTokenUsed = async (refreshToken) => {
+        return await keyTokenModel.findOne({ refreshTokenUsed: refreshToken });
+    };
+
+    static deleteKeyByUserId = async (userId) => {
+        return await keyTokenModel.deleteOne({ user: userId });
+    };
+
+    static updateRefreshTokenUsed = async (userId, refreshToken) => {
+        return await keyTokenModel.updateOne(
+            { user: userId },
+            {
+                $addToSet: { refreshTokenUsed: refreshToken },
+            },
+        );
     };
 }
 

@@ -3,8 +3,28 @@
 const AccessService = require("../services/access.service");
 
 const { OK, CREATED, SuccessResponse } = require("../core/success.response");
+const { use } = require("../routers");
 
 class AccessController {
+    handlerRefreshToken = async (req, res, next) => {
+        // new OK({
+        //     message: "Refresh token OK",
+        //     metadata: await AccessService.handlerRefreshToken(req.body.refreshToken),
+        // }).send(res);
+
+        new OK({
+            message: "Refresh token OK",
+            metadata: await AccessService.handlerRefreshTokenV2(
+                {
+                    refreshToken: req.refreshToken,
+                    user: req.user,
+                    keyStore: req.keyStore,
+                },
+                req.body.refreshToken,
+            ),
+        }).send(res);
+    };
+
     logout = async (req, res, next) => {
         new OK({
             message: "Logout OK",
