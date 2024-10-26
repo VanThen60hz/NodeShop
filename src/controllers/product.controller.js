@@ -90,6 +90,35 @@ class ProductController {
             }),
         }).send(res);
     };
+
+    /**
+     * @desc Find all products
+     * @param {Number} limit
+     * @param {String} sort
+     * @param {Number} page
+     * @param {Object} filter
+     * @return {JSON}
+     */
+    findAllProducts = async (req, res, next) => {
+        new SuccessResponse({
+            message: "Get all products successfully!",
+            metadata: await productServiceV2.findAllProducts(req.query),
+        }).send(res);
+    };
+
+    /**
+     * @desc Find product by id
+     * @param {String} product_id
+     * @return {JSON}
+     */
+    findProductById = async (req, res, next) => {
+        new SuccessResponse({
+            message: "Get product by id successfully!",
+            metadata: await productServiceV2.findProductById({
+                product_id: req.params.product_id,
+            }),
+        }).send(res);
+    };
 }
 
 module.exports = new ProductController();
