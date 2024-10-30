@@ -14,9 +14,10 @@ router.get("/:product_id", asyncHandler(productController.findProductById));
 router.use(authenticationV2);
 
 router.post("", asyncHandler(productController.createProduct));
+router.patch("/:productId", asyncHandler(productController.updateProduct));
 
-router.put("/publish/:id", asyncHandler(productController.publishProductByShop));
-router.put("/unpublish/:id", asyncHandler(productController.unPublishProductByShop));
+router.post("/publish/:id", asyncHandler(productController.publishProductByShop));
+router.post("/unpublish/:id", asyncHandler(productController.unPublishProductByShop));
 
 router.get("/drafts/all", asyncHandler(productController.getAllDraftsForShop));
 router.get("/published/all", asyncHandler(productController.getAllPublishedForShop));

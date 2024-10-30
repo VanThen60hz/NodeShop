@@ -1,7 +1,6 @@
 "use strict";
 
 const { product, clothing, electronic, furniture } = require("../models/product.model");
-
 const { BadRequestError } = require("../core/error.response");
 const {
     findAllDraftsForShop,
@@ -11,7 +10,9 @@ const {
     unPublishProductByShop,
     findAllProducts,
     findProductById,
+    updateProductById,
 } = require("../models/repositories/product.repo");
+const { parseAndFlattenObject } = require("../utils");
 
 class ProductFactory {
     static productRegistry = {};
@@ -24,6 +25,16 @@ class ProductFactory {
         const productClass = ProductFactory.productRegistry[type];
         if (!productClass) throw new BadRequestError(`Invalid product type: ${type}`);
         return new productClass(payload).createProduct();
+    }
+
+    static async updateProduct(type, productId, payload) {
+        const productClass = ProductFactory.productRegistry[type];
+        if (!productClass) throw new BadRequestError(`Invalid product type: ${type}`);
+
+        const updatedProduct = await new productClass(payload).updateProduct({ productId, bodyUpdate: payload });
+
+        if (!updatedProduct) throw new BadRequestError("Product not found or update failed");
+        return updatedProduct;
     }
 
     static publishProductByShop({ product_shop, product_id }) {
@@ -70,10 +81,6 @@ class ProductFactory {
     static async findProductById({ product_id }) {
         return await findProductById({ product_id, unSelect: ["__v"] });
     }
-
-    // static async  updateProductById({ product_id, product_shop, product_attributes }) {
-    //     return await
-    // }
 }
 
 class Product {
@@ -100,6 +107,10 @@ class Product {
     async createProduct(product_id) {
         return await product.create({ ...this, _id: product_id });
     }
+
+    async updateProduct({ productId, bodyUpdate }) {
+        return await updateProductById({ productId, bodyUpdate, model: product });
+    }
 }
 
 class Clothing extends Product {
@@ -112,6 +123,15 @@ class Clothing extends Product {
         const newProduct = await super.createProduct();
 
         return newProduct;
+    }
+
+    async updateProduct({ productId, bodyUpdate }) {
+        const objectParams = { ...this, ...bodyUpdate };
+        if (objectParams.product_attributes) {
+            await updateProductById({ productId, bodyUpdate: objectParams, model: clothing });
+        }
+
+        return await updateProductById({ productId, bodyUpdate: objectParams, model: product });
     }
 }
 
@@ -144,6 +164,28 @@ class Furniture extends Product {
         const newProduct = await super.createProduct();
 
         return newProduct;
+    }
+
+    async updateProduct({ productId, bodyUpdate }) {
+        const parsedUpdate = parseAndFlattenObject({ ...this, ...bodyUpdate });
+
+        if (parsedUpdate["product_attributes"]) {
+            const productAttributes = Object.fromEntries(
+                Object.entries(parsedUpdate).filter(([key]) => key.startsWith("product_attributes.")),
+            );
+
+            await updateProductById({
+                productId,
+                bodyUpdate: productAttributes,
+                model: furniture,
+            });
+        }
+
+        return await updateProductById({
+            productId,
+            bodyUpdate: parsedUpdate,
+            model: product,
+        });
     }
 }
 
