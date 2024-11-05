@@ -12,7 +12,10 @@ const {
     findProductById,
     updateProductById,
 } = require("../models/repositories/product.repo");
+const { insertInventory } = require("../models/repositories/inventory.repo");
+
 const { parseAndFlattenObject } = require("../utils");
+const { Types } = require("mongoose");
 
 class ProductFactory {
     static productRegistry = {};
@@ -105,7 +108,16 @@ class Product {
     }
 
     async createProduct(product_id) {
-        return await product.create({ ...this, _id: product_id });
+        const newProduct = await product.create({ ...this, _id: product_id });
+
+        if (newProduct) {
+            await insertInventory({
+                productId: newProduct._id,
+                shopId: this.product_shop,
+                stock: this.product_quantity,
+            });
+        }
+        return newProduct;
     }
 
     async updateProduct({ productId, bodyUpdate }) {
