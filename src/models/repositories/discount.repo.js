@@ -32,7 +32,12 @@ const findAllDiscountCodesSelect = async ({ limit = 50, page = 1, sort = "ctime"
     return documents;
 };
 
-const checkDiscountExists = async (model, filter) => {
+const checkDiscountExists = async ({ model, filter }) => {
+    // Ensure `discount_code` is cast to a string
+    if (filter.discount_code) {
+        filter.discount_code = String(filter.discount_code);
+    }
+
     return await model.findOne(filter).lean();
 };
 
