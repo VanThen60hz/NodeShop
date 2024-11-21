@@ -3,7 +3,7 @@
 const { product, clothing, electronic, furniture } = require("../product.model");
 const { Types } = require("mongoose");
 const { isValid } = Types.ObjectId;
-const { getSelectData, unGetSelectData } = require("../../utils");
+const { getSelectData, unGetSelectData, convertToObjectIdMongodb } = require("../../utils");
 
 const findAllDraftsForShop = async ({ query, limit = 50, skip = 0 }) => {
     return await queryProduct({ query, limit, skip });
@@ -96,6 +96,11 @@ const findProductById = async ({ product_id, unSelect }) => {
     return await product.findById(product_id).select(unGetSelectData(unSelect)).lean();
 };
 
+const getProductById = async (productId) => {
+    const convertedId = convertToObjectIdMongodb(productId);
+    return await product.findOne({ _id: convertedId }).lean();
+};
+
 module.exports = {
     findAllDraftsForShop,
     findAllPublishForShop,
@@ -105,4 +110,5 @@ module.exports = {
     findAllProducts,
     findProductById,
     updateProductById,
+    getProductById,
 };
