@@ -6,7 +6,15 @@ const _ = require("lodash");
 
 const convertToObjectIdMongodb = (id) => new Types.ObjectId(id);
 
-const getInfoData = ({ fields = [], object = {} }) => {};
+const getInfoData = ({ fields = [], object = {} }) => {
+    const data = {};
+    fields.forEach((field) => {
+        if (object[field]) {
+            data[field] = object[field];
+        }
+    });
+    return data;
+};
 
 const getSelectData = (select = []) => {
     return Object.fromEntries(select.map((el) => [el, 1]));

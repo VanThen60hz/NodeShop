@@ -1,12 +1,19 @@
 "use strict";
 
 const express = require("express");
-const inventoryController = require("../../controllers/inventory.controller");
+const commentController = require("../../controllers/comment.controller");
 const router = express.Router();
+
 const { authenticationV2 } = require("../../auth/authUtils");
 const { asyncHandler } = require("../../helpers/asyncHandler");
 
+// Authentication
 router.use(authenticationV2);
-router.post("", asyncHandler(inventoryController.addStockToInventory));
 
+// Routes
+router.post("", asyncHandler(commentController.createComment));
+
+router.get("", asyncHandler(commentController.getCommentsByParentId));
+
+// Export router
 module.exports = router;
