@@ -11,9 +11,9 @@ const { asyncHandler } = require("../../helpers/asyncHandler");
 router.use(authenticationV2);
 
 // Routes
-router.post("", asyncHandler(commentController.createComment));
-
 router.get("", asyncHandler(commentController.getCommentsByParentId));
+router.post("", asyncHandler(commentController.createComment));
+router.delete("", asyncHandler(commentController.deleteComment));
 
 // Export router
 module.exports = router;

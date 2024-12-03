@@ -5,6 +5,7 @@ const { BadRequestError, NotFoundError } = require("../core/error.response");
 
 const mongoose = require("mongoose");
 const { convertToObjectIdMongodb } = require("../utils");
+const { findProductById } = require("../models/repositories/product.repo");
 
 /*
   Key features: Comment service
@@ -72,6 +73,7 @@ class CommentService {
 
         return newComment;
     }
+
     static async getCommentsByParentId({
         productId,
         parentCommentId = null,
@@ -98,6 +100,45 @@ class CommentService {
             .skip(offset);
 
         return comments;
+    }
+
+    static async deleteComment({ commentId, productId }) {
+        const productObjectId = convertToObjectIdMongodb(productId);
+
+        const product = await findProductById({ product_id: productObjectId });
+        if (!product) throw new NotFoundError("Product not found");
+
+        const comment = await Comment.findById(commentId);
+        if (!comment) throw new NotFoundError("Comment not found");
+
+        const { comment_left: leftValue, comment_right: rightValue } = comment;
+
+        const width = rightValue - leftValue + 1;
+
+        const deleteResult = await Comment.deleteMany({
+            comment_productId: productObjectId,
+            comment_left: { $gte: leftValue, $lte: rightValue },
+        });
+
+        if (deleteResult.deletedCount > 0) {
+            await Comment.updateMany(
+                {
+                    comment_productId: productObjectId,
+                    comment_right: { $gt: rightValue },
+                },
+                { $inc: { comment_right: -width } },
+            );
+
+            await Comment.updateMany(
+                {
+                    comment_productId: productObjectId,
+                    comment_left: { $gt: rightValue },
+                },
+                { $inc: { comment_left: -width } },
+            );
+        }
+
+        return true;
     }
 }
 

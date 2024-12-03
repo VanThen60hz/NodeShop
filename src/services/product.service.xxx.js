@@ -16,6 +16,7 @@ const { insertInventory } = require("../models/repositories/inventory.repo");
 
 const { parseAndFlattenObject } = require("../utils");
 const { Types } = require("mongoose");
+const { pushNotiToSystem } = require("./notification.service");
 
 class ProductFactory {
     static productRegistry = {};
@@ -111,11 +112,26 @@ class Product {
         const newProduct = await product.create({ ...this, _id: product_id });
 
         if (newProduct) {
-            await insertInventory({
+            const invenData = await insertInventory({
                 productId: newProduct._id,
                 shopId: this.product_shop,
                 stock: this.product_quantity,
             });
+
+            // Push notification to system collection
+            pushNotiToSystem({
+                type: "SHOP-001",
+                receivedId: 1,
+                senderId: this.product_shop,
+                options: {
+                    product_name: this.product_name,
+                    shop_name: this.product_shop,
+                },
+            })
+                .then((res) => console.log(res))
+                .catch(console.error);
+
+            console.log("invenData::", invenData);
         }
         return newProduct;
     }
